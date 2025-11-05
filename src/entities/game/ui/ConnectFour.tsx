@@ -62,7 +62,7 @@ export default function ConnectFour() {
         if (state.currentPlayer && !state.winner && !state.isDraw) {
             setIsTimerRunning(true);
         }
-    }, [state.currentPlayer, state.isDraw, state.winner]);
+    }, [state.currentPlayer]);
 
     useEffect(() => {
         storage.save('connect4_settings', settings);

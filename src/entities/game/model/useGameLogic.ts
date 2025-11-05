@@ -54,7 +54,7 @@ export const useGameLogic = (settings: GameSettings) => {
         });
         setHistory([newBoard]);
         setHistoryIndex(0);
-    }, [safeRows, safeCols, safeWin, initBoard]);
+    }, [safeRows, safeCols, safeWin]);
 
     const setHoveredCol = useCallback((col: number | null) => {
         setState(s => ({ ...s, hoveredCol: col }));
