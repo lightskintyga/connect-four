@@ -78,7 +78,7 @@ export const Board = ({
                             >
                                 {board.map((row, rowIndex) => (
                                     <div key={rowIndex} className="relative w-full h-full">
-                                        <div className="w-16 h-16 bg-blue-900 dark:bg-blue-800 rounded-full mx-auto shadow-inner" />
+                                        <div className="w-16 h-16 max-sm:w-10 max-sm:h-10 bg-blue-900 dark:bg-blue-800 rounded-full mx-auto shadow-inner" />
                                         {row[col] && (
                                             <Chip
                                                 player={row[col]!}
