@@ -24,7 +24,7 @@ export const useAI = (
         };
 
         think();
-    }, [board, currentPlayer, enabled, difficulty, onMove]);
+    }, [board, currentPlayer, enabled, difficulty]);
 };
 
 const smartMove = (board: any[][], validCols: number[]): number => {
