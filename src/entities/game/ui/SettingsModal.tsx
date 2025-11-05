@@ -71,7 +71,7 @@ export const SettingsModal = ({ settings: initial, onClose, onSave }: Props) => 
                         <label>Фишек для победы: {settings.win}</label>
                         <input
                             type="range"
-                            min="3" max="6"
+                            min="3" max={Math.min(settings.rows, settings.cols)}
                             value={settings.win}
                             onChange={e => setSettings({ ...settings, win: +e.target.value })}
                             className="w-full"

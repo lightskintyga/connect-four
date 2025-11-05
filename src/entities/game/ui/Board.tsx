@@ -7,6 +7,7 @@ interface BoardProps {
     currentPlayer: 1 | 2 | null;
     winner: 1 | 2 | null;
     isDraw: boolean;
+    isDeadlocked: boolean;
     makeMove: (col: number) => void;
     dropRow: (board: (1 | 2 | null)[][], col: number) => number | null;
     hoveredCol: number | null;
@@ -20,6 +21,7 @@ export const Board = ({
                           currentPlayer,
                           winner,
                           isDraw,
+                          isDeadlocked,
                           winningCells,
                           makeMove,
                           dropRow,
@@ -47,14 +49,14 @@ export const Board = ({
                         <div
                             key={col}
                             className="relative"
-                            onMouseEnter={() => !winner && !isDraw && !disabled && onHover(col)}
+                            onMouseEnter={() => !winner && !isDraw && !isDeadlocked && !disabled && onHover(col)}
                             onMouseLeave={() => onHover(null)}
                         >
-                            {/* Hover preview */}
                             <AnimatePresence>
                                 {hoveredCol === col &&
                                     !winner &&
                                     !isDraw &&
+                                    !isDeadlocked &&
                                     !disabled &&
                                     dropRow(board, col) !== null && (
                                         <motion.div
@@ -71,7 +73,7 @@ export const Board = ({
 
                             <button
                                 onClick={() => !disabled && makeMove(col)}
-                                disabled={!!winner || isDraw || dropRow(board, col) === null || disabled}
+                                disabled={!!winner || isDraw || isDeadlocked || dropRow(board, col) === null || disabled}
                                 className="space-y-2 w-full"
                             >
                                 {board.map((row, rowIndex) => (

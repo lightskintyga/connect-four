@@ -47,7 +47,7 @@ export default function ConnectFour() {
         state.board,
         state.currentPlayer,
         makeMove,
-        settings.vsAI && state.currentPlayer === 2 && !state.winner && !state.isDraw,
+        settings.vsAI && state.currentPlayer === 2 && !state.winner && !state.isDraw && !state.isDeadlocked,
         settings.difficulty
     );
 
@@ -196,6 +196,18 @@ export default function ConnectFour() {
                             <p className="font-bold text-amber-800">Ничья!</p>
                         </motion.div>
                     )}
+                    {state.isDeadlocked && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="p-4 bg-red-100 border-2 border-red-300 rounded-lg text-center mb-4"
+                        >
+                            <p className="font-bold text-red-800">
+                                Игра окончена! Нельзя собрать {settings.win} в ряд.
+                            </p>
+                        </motion.div>
+                    )}
                 </AnimatePresence>
 
                 {!settings.vsAI && (
@@ -207,6 +219,7 @@ export default function ConnectFour() {
                     currentPlayer={state.currentPlayer}
                     winner={state.winner}
                     isDraw={state.isDraw}
+                    isDeadlocked={state.isDeadlocked}
                     winningCells={state.winningCells}
                     makeMove={makeMove}
                     dropRow={game.dropRow}

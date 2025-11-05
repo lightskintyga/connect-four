@@ -11,6 +11,7 @@ interface GameState {
     currentPlayer: Player;
     winner: Winner;
     isDraw: boolean;
+    isDeadlocked: boolean;
     hoveredCol: number | null;
     winningCells: Cell[];
 }
@@ -21,10 +22,47 @@ interface GameSettings {
     win: number;
 }
 
+const canWin = (board: Board, win: number): boolean => {
+    const rows = board.length;
+    const cols = board[0].length;
+
+    const directions = [
+        [0, 1],
+        [1, 0],
+        [1, 1],
+        [1, -1],
+    ];
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            for (const [dr, dc] of directions) {
+                const cells: (Player | null)[] = [];
+
+                for (let i = 0; i < win; i++) {
+                    const nr = r + dr * i;
+                    const nc = c + dc * i;
+                    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) break;
+                    cells.push(board[nr][nc]);
+                }
+
+                if (cells.length === win) {
+                    const nonNull = cells.filter(x => x !== null);
+                    const allSame = new Set(nonNull).size <= 1;
+                    if (allSame) return true;
+                }
+            }
+        }
+    }
+
+    return false;
+};
+
+
+
 export const useGameLogic = (settings: GameSettings) => {
-    const safeRows = Math.max(4, Math.min(15, settings.rows));  // до 15 строк
-    const safeCols = Math.max(4, Math.min(15, settings.cols));
-    const safeWin = Math.max(3, Math.min(8, settings.win));
+    const safeRows = Math.max(4, Math.min(8, settings.rows));
+    const safeCols = Math.max(4, Math.min(10, settings.cols));
+    const safeWin = Math.max(3, Math.min(settings.win, settings.rows, settings.cols));
 
     const initBoard = (): Board => {
         return Array(safeRows).fill(null).map(() => Array(safeCols).fill(null));
@@ -35,6 +73,7 @@ export const useGameLogic = (settings: GameSettings) => {
         currentPlayer: 1,
         winner: null,
         isDraw: false,
+        isDeadlocked: false,
         hoveredCol: null,
         winningCells: [],
     });
@@ -49,6 +88,7 @@ export const useGameLogic = (settings: GameSettings) => {
             currentPlayer: 1,
             winner: null,
             isDraw: false,
+            isDeadlocked: false,
             hoveredCol: null,
             winningCells: [],
         });
@@ -100,10 +140,11 @@ export const useGameLogic = (settings: GameSettings) => {
         return [];
     };
 
-    const isFull = (board: Board): boolean => board[0].every(cell => cell !== null);
+    const isFull = (board: Board): boolean => board.every(row => row.every(cell => cell !== null));
 
     const makeMove = useCallback((col: number) => {
-        if (state.winner || state.isDraw) return;
+        if (state.winner || state.isDraw || state.isDeadlocked) return;
+
         const row = dropRow(state.board, col);
         if (row === null) return;
 
@@ -115,11 +156,14 @@ export const useGameLogic = (settings: GameSettings) => {
         const won = winningCells.length >= safeWin;
         const full = isFull(newBoard);
 
+        const stillPossible = !full && canWin(newBoard, safeWin);
+
         const newState = {
             board: newBoard,
             currentPlayer: (state.currentPlayer === 1 ? 2 : 1) as Player,
             winner: won ? state.currentPlayer : null,
             isDraw: !won && full,
+            isDeadlocked: !won && !full && !stillPossible,
             hoveredCol: null,
             winningCells: won ? winningCells : [],
         };
@@ -127,7 +171,7 @@ export const useGameLogic = (settings: GameSettings) => {
         setState(newState);
         setHistory(prev => [...prev.slice(0, historyIndex + 1), newBoard]);
         setHistoryIndex(prev => prev + 1);
-    }, [state.winner, state.isDraw, state.board, state.currentPlayer, findWinningCells, safeWin, historyIndex]);
+    }, [state, dropRow, findWinningCells, safeWin, historyIndex]);
 
     const undo = useCallback(() => {
         if (historyIndex <= 0) return;
@@ -138,6 +182,7 @@ export const useGameLogic = (settings: GameSettings) => {
             currentPlayer: s.currentPlayer === 1 ? 2 : 1,
             winner: null,
             isDraw: false,
+            isDeadlocked: false,
             winningCells: [],
         }));
         setHistoryIndex(prevIndex);
@@ -152,6 +197,7 @@ export const useGameLogic = (settings: GameSettings) => {
             currentPlayer: s.currentPlayer === 1 ? 2 : 1,
             winner: null,
             isDraw: false,
+            isDeadlocked: false,
             winningCells: [],
         }));
         setHistoryIndex(nextIndex);
@@ -164,6 +210,7 @@ export const useGameLogic = (settings: GameSettings) => {
             currentPlayer: 1,
             winner: null,
             isDraw: false,
+            isDeadlocked: false,
             hoveredCol: null,
             winningCells: [],
         });
