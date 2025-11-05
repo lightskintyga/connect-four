@@ -8,5 +8,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        const darkMode = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (darkMode) document.documentElement.classList.add('dark');
+      })();
+    </script>
   </body>
 </html>
